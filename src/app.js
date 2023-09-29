@@ -23,6 +23,35 @@ connection.connect((err) => {
   }
 });
 
+// Rota para a página principal
+app.route('/')
+  .get((req, res) => {
+    const query = 'SELECT * FROM postagens ORDER BY id DESC LIMIT 1';
+
+    connection.query(query, (err, results) => {
+      if (err) {
+        console.error('Erro ao obter postagens:', err);
+        res.status(500).send('Erro interno do servidor');
+      } else {
+        const postagem = results[0];
+        res.send(`<h1>Última Postagem:</h1><p>${postagem ? postagem.mensagem : 'Nenhuma postagem ainda.'}</p>`);
+      }
+    });
+  })
+  .post((req, res) => {
+    const { mensagem } = req.body;
+    const query = 'INSERT INTO postagens (mensagem) VALUES (?)';
+
+    connection.query(query, [mensagem], (err) => {
+      if (err) {
+        console.error('Erro ao adicionar postagem:', err);
+        res.status(500).send('Erro interno do servidor');
+      } else {
+        res.redirect('/');
+      }
+    });
+  });
+
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
